@@ -1,0 +1,37 @@
+// omarchy-cli retint — installed by ~/.config/omarchy/hooks/theme-set.d/50-aether-cli-retints
+// (Aether extras). Follows the active Omarchy theme.
+//
+// Aether — fastfetch emblem & module palette
+//
+// Installed to ~/.config/fastfetch/config.jsonc by the Aether hook
+// (extras/omarchy-cli-retints, wired into Omarchy's theme-set hook), so the
+// emblem and key gradient follow the active theme. Omarchy's About window
+// detects a user config and renders this file as-is.
+//
+// The emblem is inline art (logo type "data-raw") so it travels with the
+// theme file: a cyan→violet ANSI-shadow AETHER wordmark under a dim
+// tagline, over module keys that fade cyan → violet down the list.
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": {
+    "type": "data-raw",
+    "source": "\u001b[38;2;107;127;153m  ⟡   c y b e r - e t h e r e a l   ⟡\u001b[0m\n\u001b[38;2;0;240;255m █████╗ ███████╗████████╗██╗  ██╗███████╗██████╗ \u001b[0m\n\u001b[38;2;19;223;254m██╔══██╗██╔════╝╚══██╔══╝██║  ██║██╔════╝██╔══██╗\u001b[0m\n\u001b[38;2;37;206;253m███████║█████╗     ██║   ███████║█████╗  ██████╔╝\u001b[0m\n\u001b[38;2;56;188;252m██╔══██║██╔══╝     ██║   ██╔══██║██╔══╝  ██╔══██╗\u001b[0m\n\u001b[38;2;75;171;251m██║  ██║███████╗   ██║   ██║  ██║███████╗██║  ██║\u001b[0m\n\u001b[38;2;168;85;247m╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝\u001b[0m\n\u001b[38;2;125;249;255m  ◈   f r o s t e d   g l a s s   ◈\u001b[0m",
+    "padding": { "top": 1, "right": 4, "bottom": 1 }
+  },
+  "modules": [
+    { "type": "title", "color": { "user": "#00f0ff", "at": "#5d9afa", "host": "#a855f7" } },
+    { "type": "separator", "string": "────────────────────", "outputColor": "#2b3f57" },
+    { "type": "os", "key": "󰣇 OS", "keyColor": "#00f0ff" },
+    { "type": "kernel", "key": "󰒋 Kernel", "keyColor": "#13dffe" },
+    { "type": "wm", "key": "󰖐 WM", "keyColor": "#25cefd" },
+    { "type": "uptime", "key": "󰅐 Uptime", "keyColor": "#38bcfc" },
+    { "type": "shell", "key": "󰆍 Shell", "keyColor": "#4babfb" },
+    { "type": "terminal", "key": "󰄛 Terminal", "keyColor": "#5d9afa" },
+    { "type": "packages", "key": "󰏖 Packages", "keyColor": "#7089f9" },
+    { "type": "cpu", "key": "󰻠 CPU", "keyColor": "#8378f8" },
+    { "type": "gpu", "key": "󰢮 GPU", "keyColor": "#9566f7" },
+    { "type": "memory", "key": "󰍛 Memory", "keyColor": "#a855f7" },
+    "break",
+    { "type": "colors", "symbol": "diamond", "paddingLeft": 2 }
+  ]
+}

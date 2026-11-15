@@ -1,0 +1,328 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2560" height="1440" viewBox="0 0 2560 1440">
+  <defs>
+    <linearGradient id="edge" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#00f0ff"/>
+      <stop offset="1" stop-color="#a855f7"/>
+    </linearGradient>
+    <linearGradient id="logoGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#00f0ff"/>
+      <stop offset="1" stop-color="#a855f7"/>
+    </linearGradient>
+    <linearGradient id="cpuGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#00f0ff" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#a855f7" stop-opacity=".55"/>
+    </linearGradient>
+    <linearGradient id="folderGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#22c7e8"/>
+      <stop offset="1" stop-color="#2467c9"/>
+    </linearGradient>
+    <linearGradient id="barEdge" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#00f0ff" stop-opacity="0"/>
+      <stop offset=".25" stop-color="#00f0ff" stop-opacity=".55"/>
+      <stop offset=".75" stop-color="#a855f7" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#a855f7" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="panelShadow" x="-30%" y="-30%" width="160%" height="180%">
+      <feDropShadow dx="0" dy="20" stdDeviation="26" flood-color="#00c8d8" flood-opacity=".16"/>
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000000" flood-opacity=".55"/>
+    </filter>
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="10" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="activeGlow" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="6" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="barShadow" x="-20%" y="-200%" width="140%" height="500%">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#000" flood-opacity=".5"/>
+    </filter>
+    <symbol id="folder" viewBox="0 0 120 96">
+      <path d="M6 20a10 10 0 0 1 10-10h26l12 12h50a10 10 0 0 1 10 10v48a10 10 0 0 1-10 10H16a10 10 0 0 1-10-10Z" fill="url(#folderGrad)" opacity=".92"/>
+      <path d="M6 30h108v40a10 10 0 0 1-10 10H16a10 10 0 0 1-10-10Z" fill="#0b1220" opacity=".18"/>
+      <path d="M6 20a10 10 0 0 1 10-10h26l12 12h50a10 10 0 0 1 10 10" fill="none" stroke="#9beeff" stroke-opacity=".55" stroke-width="2"/>
+    </symbol>
+  </defs>
+
+  <!-- wallpaper -->
+  <image href="preview-bg.png" x="0" y="0" width="2560" height="1440"/>
+  <rect x="0" y="0" width="2560" height="1440" fill="#02040a" opacity=".28"/>
+
+  <!-- bar -->
+  <rect x="0" y="0" width="2560" height="44" fill="#070b14" opacity=".78"/>
+  <rect x="0" y="43" width="2560" height="1" fill="url(#barEdge)"/>
+
+  <g font-family="Adwaita Sans" font-size="17">
+    <g font-family="JetBrainsMono Nerd Font" font-size="16">
+      <g filter="url(#activeGlow)">
+        <rect x="34" y="9" width="36" height="26" rx="8" fill="#00f0ff"/>
+      </g>
+      <text x="52" y="27" text-anchor="middle" fill="#041018" font-weight="700">1</text>
+      <text x="90" y="27" text-anchor="middle" fill="#cfe3f7" opacity=".62">2</text>
+      <text x="128" y="27" text-anchor="middle" fill="#cfe3f7" opacity=".62">3</text>
+      <text x="166" y="27" text-anchor="middle" fill="#cfe3f7" opacity=".62">4</text>
+      <text x="204" y="27" text-anchor="middle" fill="#cfe3f7" opacity=".62">5</text>
+      <text x="268" y="28" fill="#8fa8c4" opacity=".9">&#xf120;</text>
+      <text x="304" y="28" fill="#8fa8c4" opacity=".9">&#xf269;</text>
+      <text x="340" y="28" fill="#8fa8c4" opacity=".9">&#xf07b;</text>
+    </g>
+
+    <text x="1280" y="28" text-anchor="middle" fill="#e6f1ff" font-size="18">Sat 14 Nov  ·  20:22</text>
+
+    <g font-family="JetBrainsMono Nerd Font" font-size="17" fill="#cfe3f7">
+      <text x="2336" y="28" opacity=".85">&#xf028;</text>
+      <text x="2384" y="28" opacity=".85">&#xf1eb;</text>
+      <text x="2432" y="28" opacity=".85">&#xf240;</text>
+      <text x="2524" y="28" text-anchor="end" font-family="Adwaita Sans" font-size="16" opacity=".75">100%</text>
+    </g>
+  </g>
+
+  <!-- terminal window -->
+  <g filter="url(#panelShadow)">
+    <rect x="80" y="80" width="1400" height="1040" rx="18" fill="#070b14" opacity=".80"/>
+    <rect x="81" y="81" width="1398" height="1038" rx="17" fill="none" stroke="url(#edge)" stroke-width="1.6" opacity=".9"/>
+  </g>
+  <rect x="80" y="80" width="1400" height="46" rx="18" fill="#0a111d" opacity=".86"/>
+  <rect x="80" y="108" width="1400" height="18" fill="#0a111d" opacity=".86"/>
+  <line x1="80" y1="126" x2="1480" y2="126" stroke="#1d3049" stroke-width="1"/>
+  <circle cx="112" cy="103" r="6" fill="#00f0ff" opacity=".9"/>
+  <circle cx="134" cy="103" r="6" fill="#a855f7" opacity=".9"/>
+  <circle cx="156" cy="103" r="6" fill="#2b3f57"/>
+  <text x="780" y="109" text-anchor="middle" font-family="Adwaita Sans" font-size="15" fill="#8fa8c4">aether — kitty</text>
+  <g font-family="JetBrainsMono Nerd Font" font-size="14" fill="#6b7f99" text-anchor="middle">
+    <text x="1394" y="109">−</text>
+    <text x="1420" y="109">□</text>
+    <text x="1446" y="109">×</text>
+  </g>
+
+  <!-- logo -->
+  <g font-family="JetBrainsMono Nerd Font" font-size="17.4" fill="url(#logoGrad)" filter="url(#softGlow)" xml:space="preserve">
+    <text x="128" y="190"> █████╗ ███████╗████████╗██╗  ██╗███████╗██████╗ </text>
+    <text x="128" y="215">██╔══██╗██╔════╝╚══██╔══╝██║  ██║██╔════╝██╔══██╗</text>
+    <text x="128" y="240">███████║█████╗     ██║   ███████║█████╗  ██████╔╝</text>
+    <text x="128" y="265">██╔══██║██╔══╝     ██║   ██╔══██║██╔══╝  ██╔══██╗</text>
+    <text x="128" y="290">██║  ██║███████╗   ██║   ██║  ██║███████╗██║  ██║</text>
+    <text x="128" y="315">╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝</text>
+  </g>
+
+  <!-- stats -->
+  <g font-family="JetBrainsMono Nerd Font" font-size="17">
+    <text x="760" y="188" fill="#00f0ff" font-weight="700" font-size="19">krxsh@aether</text>
+    <text x="760" y="212" fill="#2b3f57">──────────────────────────────────</text>
+    <g fill="#6b7f99">
+      <text x="760" y="248">OS</text>
+      <text x="1090" y="248">WM</text>
+      <text x="760" y="278">Shell</text>
+      <text x="1090" y="278">Terminal</text>
+      <text x="760" y="308">Theme</text>
+      <text x="1090" y="308">Icons</text>
+      <text x="760" y="338">Uptime</text>
+      <text x="1090" y="338">Packages</text>
+      <text x="760" y="368">Resolution</text>
+      <text x="1090" y="368">GPU</text>
+    </g>
+    <g fill="#e6f1ff" text-anchor="end">
+      <text x="1030" y="248">Omarchy 3.0</text>
+      <text x="1410" y="248">Hyprland 0.56</text>
+      <text x="1030" y="278">omarchy-shell</text>
+      <text x="1410" y="278">kitty 0.44</text>
+      <text x="1030" y="308" fill="#00f0ff">Aether</text>
+      <text x="1410" y="308">Yaru-purple</text>
+      <text x="1030" y="338">2 hours, 14 mins</text>
+      <text x="1410" y="338">1482</text>
+      <text x="1030" y="368">5120×2880</text>
+      <text x="1410" y="368">Radeon 780M</text>
+    </g>
+  </g>
+
+  <line x1="128" y1="414" x2="1432" y2="414" stroke="#1d3049" stroke-width="1" opacity=".8"/>
+
+  <!-- terminal transcript -->
+  <g font-family="JetBrainsMono Nerd Font" font-size="19">
+    <text x="128" y="458" fill="#00f0ff">❯</text>
+    <text x="162" y="458" fill="#e6f1ff">omarchy theme current</text>
+    <text x="162" y="490" fill="#5cf2c5">Aether</text>
+
+    <text x="128" y="536" fill="#00f0ff">❯</text>
+    <text x="162" y="536" fill="#e6f1ff">omarchy theme bg next</text>
+    <text x="162" y="568" fill="#6b7f99">→ backgrounds/</text>
+    <text x="330" y="568" fill="#a855f7">1-aether-veil.webp</text>
+
+    <text x="128" y="614" fill="#00f0ff">❯</text>
+    <text x="162" y="614" fill="#e6f1ff">btop --utf-force</text>
+    <text x="162" y="646" fill="#ffd166">frosted glass · electric cyan · neon violet</text>
+  </g>
+
+  <!-- palette -->
+  <g font-family="JetBrainsMono Nerd Font">
+    <text x="128" y="706" fill="#6b7f99" font-size="15" letter-spacing="1">PALETTE</text>
+    <g>
+      <rect x="128" y="724" width="58" height="34" rx="6" fill="#070b14" stroke="#1d3049"/>
+      <rect x="196" y="724" width="58" height="34" rx="6" fill="#ff4d6d"/>
+      <rect x="264" y="724" width="58" height="34" rx="6" fill="#5cf2c5"/>
+      <rect x="332" y="724" width="58" height="34" rx="6" fill="#ffd166"/>
+      <rect x="400" y="724" width="58" height="34" rx="6" fill="#4cc9f0"/>
+      <rect x="468" y="724" width="58" height="34" rx="6" fill="#a855f7"/>
+      <rect x="536" y="724" width="58" height="34" rx="6" fill="#00f0ff"/>
+      <rect x="604" y="724" width="58" height="34" rx="6" fill="#e6f1ff"/>
+    </g>
+    <g>
+      <rect x="128" y="782" width="58" height="34" rx="6" fill="#2b3f57"/>
+      <rect x="196" y="782" width="58" height="34" rx="6" fill="#ff7a93"/>
+      <rect x="264" y="782" width="58" height="34" rx="6" fill="#8bffe0"/>
+      <rect x="332" y="782" width="58" height="34" rx="6" fill="#ffe39a"/>
+      <rect x="400" y="782" width="58" height="34" rx="6" fill="#8bdcff"/>
+      <rect x="468" y="782" width="58" height="34" rx="6" fill="#c084fc"/>
+      <rect x="536" y="782" width="58" height="34" rx="6" fill="#7df9ff"/>
+      <rect x="604" y="782" width="58" height="34" rx="6" fill="#f7fcff"/>
+    </g>
+    <g fill="#6b7f99" font-size="12" text-anchor="middle">
+      <text x="157" y="838">0</text><text x="225" y="838">1</text><text x="293" y="838">2</text><text x="361" y="838">3</text>
+      <text x="429" y="838">4</text><text x="497" y="838">5</text><text x="565" y="838">6</text><text x="633" y="838">7</text>
+      <text x="157" y="866">8</text><text x="225" y="866">9</text><text x="293" y="866">10</text><text x="361" y="866">11</text>
+      <text x="429" y="866">12</text><text x="497" y="866">13</text><text x="565" y="866">14</text><text x="633" y="866">15</text>
+    </g>
+  </g>
+
+  <!-- prompt -->
+  <g font-family="JetBrainsMono Nerd Font" font-size="19">
+    <text x="128" y="946" fill="#00f0ff">❯</text>
+    <text x="162" y="946" fill="#e6f1ff">hyprctl clients | wc -l</text>
+    <text x="162" y="978" fill="#6b7f99">4</text>
+    <text x="128" y="1024" fill="#00f0ff">❯</text>
+    <rect x="162" y="1006" width="13" height="24" fill="#00f0ff" opacity=".85"/>
+  </g>
+
+  <!-- btop window -->
+  <g filter="url(#panelShadow)">
+    <rect x="1520" y="110" width="950" height="700" rx="18" fill="#070b14" opacity=".84"/>
+    <rect x="1521" y="111" width="948" height="698" rx="17" fill="none" stroke="url(#edge)" stroke-width="1.4" opacity=".7"/>
+  </g>
+  <rect x="1520" y="110" width="950" height="40" rx="18" fill="#0a111d" opacity=".9"/>
+  <rect x="1520" y="132" width="950" height="18" fill="#0a111d" opacity=".9"/>
+  <circle cx="1548" cy="130" r="5" fill="#a855f7" opacity=".9"/>
+  <circle cx="1566" cy="130" r="5" fill="#2b3f57"/>
+  <text x="1995" y="136" text-anchor="middle" font-family="Adwaita Sans" font-size="14" fill="#8fa8c4">btop++  1.4.0</text>
+
+  <g font-family="JetBrainsMono Nerd Font">
+    <!-- CPU -->
+    <rect x="1540" y="166" width="910" height="138" rx="8" fill="#08101c" opacity=".55" stroke="#2b3f57" stroke-width="1"/>
+    <text x="1556" y="190" fill="#00f0ff" font-size="15">cpu</text>
+    <text x="2434" y="190" text-anchor="end" fill="#e6f1ff" font-size="15">23%</text>
+    <g>
+      <rect x="1556" y="204" width="60" height="80" rx="3" fill="#111a2b"/>
+      <rect x="1556" y="256" width="60" height="28" rx="3" fill="url(#cpuGrad)"/>
+      <rect x="1626" y="204" width="60" height="80" rx="3" fill="#111a2b"/>
+      <rect x="1626" y="238" width="60" height="46" rx="3" fill="url(#cpuGrad)"/>
+      <rect x="1696" y="204" width="60" height="80" rx="3" fill="#111a2b"/>
+      <rect x="1696" y="246" width="60" height="38" rx="3" fill="url(#cpuGrad)"/>
+      <rect x="1766" y="204" width="60" height="80" rx="3" fill="#111a2b"/>
+      <rect x="1766" y="228" width="60" height="56" rx="3" fill="url(#cpuGrad)"/>
+      <rect x="1836" y="204" width="60" height="80" rx="3" fill="#111a2b"/>
+      <rect x="1836" y="262" width="60" height="22" rx="3" fill="url(#cpuGrad)"/>
+      <rect x="1906" y="204" width="60" height="80" rx="3" fill="#111a2b"/>
+      <rect x="1906" y="234" width="60" height="50" rx="3" fill="url(#cpuGrad)"/>
+      <rect x="1976" y="204" width="60" height="80" rx="3" fill="#111a2b"/>
+      <rect x="1976" y="252" width="60" height="32" rx="3" fill="url(#cpuGrad)"/>
+      <rect x="2046" y="204" width="60" height="80" rx="3" fill="#111a2b"/>
+      <rect x="2046" y="242" width="60" height="42" rx="3" fill="url(#cpuGrad)"/>
+    </g>
+    <g font-size="13" fill="#6b7f99">
+      <text x="2190" y="224">C0</text><text x="2190" y="244">C1</text><text x="2190" y="264">C2</text><text x="2190" y="284">C3</text>
+      <text x="2258" y="224">23%</text><text x="2258" y="244">18%</text><text x="2258" y="264">31%</text><text x="2258" y="284">14%</text>
+      <text x="2324" y="224">2.4 GHz</text><text x="2324" y="244">2.1 GHz</text><text x="2324" y="264">2.6 GHz</text><text x="2324" y="284">1.9 GHz</text>
+    </g>
+    <text x="1556" y="300" fill="#6b7f99" font-size="12">load avg  0.42  0.51  0.48</text>
+    <text x="2434" y="300" text-anchor="end" fill="#6b7f99" font-size="12">temp 58°C</text>
+
+    <!-- MEM -->
+    <rect x="1540" y="318" width="445" height="150" rx="8" fill="#08101c" opacity=".55" stroke="#2b3f57"/>
+    <text x="1556" y="342" fill="#5cf2c5" font-size="15">mem</text>
+    <text x="1968" y="342" text-anchor="end" fill="#e6f1ff" font-size="15">9.8G / 32G</text>
+    <text x="1556" y="368" fill="#6b7f99" font-size="13">used</text>
+    <rect x="1556" y="376" width="400" height="14" rx="4" fill="#111a2b"/>
+    <rect x="1556" y="376" width="123" height="14" rx="4" fill="#5cf2c5" opacity=".85"/>
+    <text x="1556" y="414" fill="#6b7f99" font-size="13">cache</text>
+    <rect x="1556" y="422" width="400" height="14" rx="4" fill="#111a2b"/>
+    <rect x="1556" y="422" width="188" height="14" rx="4" fill="#a855f7" opacity=".7"/>
+    <text x="1556" y="456" fill="#6b7f99" font-size="12">free 21.4G</text>
+
+    <!-- NET -->
+    <rect x="2005" y="318" width="445" height="150" rx="8" fill="#08101c" opacity=".55" stroke="#2b3f57"/>
+    <text x="2021" y="342" fill="#4cc9f0" font-size="15">net</text>
+    <text x="2434" y="342" text-anchor="end" fill="#e6f1ff" font-size="15">1.2 Gb/s</text>
+    <polyline points="2021,424 2061,410 2101,418 2141,392 2181,400 2221,380 2261,388 2301,368 2341,384 2381,360 2421,372 2434,366" fill="none" stroke="#00f0ff" stroke-width="2" opacity=".85"/>
+    <polyline points="2021,446 2061,438 2101,442 2141,430 2181,436 2221,424 2261,430 2301,420 2341,428 2381,416 2421,424 2434,420" fill="none" stroke="#a855f7" stroke-width="2" opacity=".75"/>
+    <text x="2021" y="462" fill="#6b7f99" font-size="12">▼ 86.2 MB/s    ▲ 18.4 MB/s</text>
+
+    <!-- PROC -->
+    <rect x="1540" y="480" width="910" height="312" rx="8" fill="#08101c" opacity=".55" stroke="#2b3f57"/>
+    <text x="1556" y="504" fill="#e6f1ff" font-size="14" font-weight="700">pid</text>
+    <text x="1636" y="504" fill="#e6f1ff" font-size="14" font-weight="700">program</text>
+    <text x="2080" y="504" fill="#e6f1ff" font-size="14" font-weight="700" text-anchor="end">cpu</text>
+    <text x="2200" y="504" fill="#e6f1ff" font-size="14" font-weight="700" text-anchor="end">mem</text>
+    <text x="2434" y="504" fill="#e6f1ff" font-size="14" font-weight="700" text-anchor="end">command</text>
+    <g font-size="13">
+      <g fill="#cfe3f7">
+        <text x="1556" y="534">814</text><text x="1636" y="534">Hyprland</text><text x="2080" y="534" text-anchor="end" fill="#00f0ff">4.2</text><text x="2200" y="534" text-anchor="end">1.8</text><text x="2434" y="534" text-anchor="end" fill="#6b7f99">/usr/bin/Hyprland</text>
+        <text x="1556" y="560">1002</text><text x="1636" y="560">omarchy-shell</text><text x="2080" y="560" text-anchor="end" fill="#00f0ff">3.8</text><text x="2200" y="560" text-anchor="end">2.4</text><text x="2434" y="560" text-anchor="end" fill="#6b7f99">quickshell -p ...</text>
+        <text x="1556" y="586">1184</text><text x="1636" y="586">kitty</text><text x="2080" y="586" text-anchor="end" fill="#ffd166">2.1</text><text x="2200" y="586" text-anchor="end">0.9</text><text x="2434" y="586" text-anchor="end" fill="#6b7f99">kitty --config ...</text>
+        <text x="1556" y="612">1246</text><text x="1636" y="612">btop</text><text x="2080" y="612" text-anchor="end" fill="#ffd166">1.7</text><text x="2200" y="612" text-anchor="end">0.4</text><text x="2434" y="612" text-anchor="end" fill="#6b7f99">btop --utf-force</text>
+        <text x="1556" y="638">1391</text><text x="1636" y="638">nautilus</text><text x="2080" y="638" text-anchor="end">0.8</text><text x="2200" y="638" text-anchor="end">1.1</text><text x="2434" y="638" text-anchor="end" fill="#6b7f99">nautilus --new-window</text>
+        <text x="1556" y="664">1533</text><text x="1636" y="664">wireplumber</text><text x="2080" y="664" text-anchor="end">0.4</text><text x="2200" y="664" text-anchor="end">0.2</text><text x="2434" y="664" text-anchor="end" fill="#6b7f99">/usr/bin/wireplumber</text>
+        <text x="1556" y="690">1760</text><text x="1636" y="690">chromium</text><text x="2080" y="690" text-anchor="end">0.3</text><text x="2200" y="690" text-anchor="end">2.9</text><text x="2434" y="690" text-anchor="end" fill="#6b7f99">chromium --enable-features</text>
+      </g>
+      <rect x="1548" y="700" width="894" height="24" rx="4" fill="#00f0ff" opacity=".08"/>
+      <text x="1556" y="717" fill="#00f0ff">1844</text>
+      <text x="1636" y="717" fill="#00f0ff">python3</text>
+      <text x="2080" y="717" text-anchor="end" fill="#00f0ff">0.2</text>
+      <text x="2200" y="717" text-anchor="end" fill="#00f0ff">1.4</text>
+      <text x="2434" y="717" text-anchor="end" fill="#00f0ff">./extras/generate-assets.sh</text>
+    </g>
+    <text x="1556" y="760" fill="#6b7f99" font-size="12">24 processes · 132 threads</text>
+    <text x="2434" y="760" text-anchor="end" fill="#6b7f99" font-size="12">up 2h 14m</text>
+  </g>
+
+  <!-- files window -->
+  <g filter="url(#panelShadow)">
+    <rect x="1520" y="850" width="950" height="510" rx="18" fill="#070b14" opacity=".84"/>
+    <rect x="1521" y="851" width="948" height="508" rx="17" fill="none" stroke="url(#edge)" stroke-width="1.4" opacity=".7"/>
+  </g>
+  <rect x="1520" y="850" width="950" height="40" rx="18" fill="#0a111d" opacity=".9"/>
+  <rect x="1520" y="872" width="950" height="18" fill="#0a111d" opacity=".9"/>
+  <circle cx="1548" cy="870" r="5" fill="#00f0ff" opacity=".9"/>
+  <circle cx="1566" cy="870" r="5" fill="#2b3f57"/>
+  <text x="1995" y="876" text-anchor="middle" font-family="Adwaita Sans" font-size="14" fill="#8fa8c4">Files — Home</text>
+
+  <rect x="1520" y="890" width="230" height="470" fill="#0a111d" opacity=".55"/>
+  <g font-family="Adwaita Sans" font-size="15">
+    <rect x="1536" y="910" width="198" height="34" rx="9" fill="#00f0ff" opacity=".10"/>
+    <text x="1558" y="932" fill="#00f0ff">⌂  Home</text>
+    <text x="1558" y="972" fill="#cfe3f7">◷  Recent</text>
+    <text x="1558" y="1008" fill="#cfe3f7">★  Starred</text>
+    <text x="1558" y="1044" fill="#cfe3f7">↓  Downloads</text>
+    <text x="1558" y="1080" fill="#cfe3f7">▣  Projects</text>
+    <text x="1558" y="1116" fill="#cfe3f7">▤  Documents</text>
+    <text x="1558" y="1152" fill="#6b7f99">⏱  Trash</text>
+  </g>
+  <line x1="1750" y1="890" x2="1750" y2="1360" stroke="#1d3049" opacity=".7"/>
+
+  <g font-family="Adwaita Sans" font-size="14" fill="#cfe3f7" text-anchor="middle">
+    <use href="#folder" x="1790" y="930" width="108" height="86"/>
+    <text x="1844" y="1042">Documents</text>
+    <use href="#folder" x="1936" y="930" width="108" height="86"/>
+    <text x="1990" y="1042">Downloads</text>
+    <use href="#folder" x="2082" y="930" width="108" height="86"/>
+    <text x="2136" y="1042">Pictures</text>
+    <use href="#folder" x="1790" y="1080" width="108" height="86"/>
+    <text x="1844" y="1192">Music</text>
+    <use href="#folder" x="1936" y="1080" width="108" height="86"/>
+    <text x="1990" y="1192">Videos</text>
+    <use href="#folder" x="2082" y="1080" width="108" height="86"/>
+    <text x="2136" y="1192">Projects</text>
+  </g>
+  <g font-family="Adwaita Sans" font-size="13" fill="#6b7f99">
+    <text x="1790" y="1300">6 items · 24.1 GB available</text>
+    <text x="2434" y="1300" text-anchor="end">Aether / Home</text>
+  </g>
+</svg>
