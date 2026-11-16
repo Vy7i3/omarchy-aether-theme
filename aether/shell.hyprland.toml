@@ -1,7 +1,0 @@
-# Aether — shared Hyprland-derived border tokens
-# The generated file would copy the full border gradient into
-# active-border-foreground too; keep the foreground a readable solid.
-
-[hyprland]
-active-border            = "rgba(00f0ffee) rgba(a855f7ee) 45deg"
-active-border-foreground = "#e6f1ff"

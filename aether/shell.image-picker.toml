@@ -1,9 +1,0 @@
-# Aether — wallpaper and theme picker carousel
-# Replaces the generated [image-picker] section.
-
-[image-picker]
-text                    = "#e6f1ff"
-selected-border         = "#00f0ff"
-selected-border-alpha   = 1.0
-unselected-border       = "#cfe3f7"
-unselected-border-alpha = 0.28

@@ -1,9 +1,0 @@
-# Aether — hover tooltips
-# Slightly denser than popups so small text stays readable over any wallpaper.
-
-[tooltip]
-background       = "#070b14"
-background-alpha = 0.88
-text             = "#e6f1ff"
-border           = "rgba(00f0ffee) rgba(a855f7ee) 45deg"
-border-alpha     = 0.75
