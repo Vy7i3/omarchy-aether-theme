@@ -1,0 +1,55 @@
+# Aether — Alacritty palette
+# Omarchy imports this file from ~/.config/alacritty/alacritty.toml.
+
+[window]
+# Glass. Hyprland supplies the backdrop blur; Alacritty's own blur key is a
+# macOS/KDE-only path and is intentionally omitted.
+opacity = 0.72
+
+[colors.primary]
+background = "#070b14"
+foreground = "#e6f1ff"
+
+[colors.cursor]
+text = "#070b14"
+cursor = "#00f0ff"
+
+[colors.vi_mode_cursor]
+text = "#070b14"
+cursor = "#a855f7"
+
+[colors.search.matches]
+foreground = "#070b14"
+background = "#ffd166"
+
+[colors.search.focused_match]
+foreground = "#070b14"
+background = "#ff4d6d"
+
+[colors.footer_bar]
+foreground = "#070b14"
+background = "#e6f1ff"
+
+[colors.selection]
+text = "#f7fcff"
+background = "#12384a"
+
+[colors.normal]
+black = "#070b14"
+red = "#ff4d6d"
+green = "#5cf2c5"
+yellow = "#ffd166"
+blue = "#4cc9f0"
+magenta = "#a855f7"
+cyan = "#00f0ff"
+white = "#e6f1ff"
+
+[colors.bright]
+black = "#2b3f57"
+red = "#ff7a93"
+green = "#8bffe0"
+yellow = "#ffe39a"
+blue = "#8bdcff"
+magenta = "#c084fc"
+cyan = "#7df9ff"
+white = "#f7fcff"

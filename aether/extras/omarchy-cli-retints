@@ -1,0 +1,321 @@
+#!/usr/bin/env bash
+# Aether — CLI retints that Omarchy's stock theme pipeline does not cover.
+#
+# Installed by the theme's extras/install-extras.sh into
+# ~/.config/omarchy/hooks/theme-set.d/, so Omarchy runs it on every theme
+# switch with the new theme's name as $1 (which this script ignores: it
+# always reads ~/.local/state/omarchy/current/theme, the theme that just
+# landed).
+#
+# It retints the three CLI surfaces Omarchy has no built-in consumer for:
+#
+#   fastfetch  the active theme's fastfetch.jsonc becomes the user config,
+#              so the About emblem and plain `fastfetch` follow the theme
+#   cava       the active palette is rendered to themes/omarchy-current,
+#              which a one-time installer line in cava's config selects
+#   lazygit    ~/.config/lazygit/config.yml is rendered from the palette
+#              when the file is empty or already hook-managed
+#   bar        when the theme ships extras/bar (the floating bar-engine
+#              clone), it is selected as the bar with a glassy background;
+#              themes without it get the stock engine back with the bar
+#              background the user had before Aether took over
+#   screensaver while the theme ships extras/screensaver.txt it is the
+#              screensaver wordmark; other themes get the user's previous
+#              art (installer backup, else the stock Omarchy logo) back
+#   terminals  a last-in-line config reload that heals a terminal whose
+#              reload raced the theme swap and kept its previous look
+#
+# Every takeover is recorded in ~/.local/state/omarchy/aether-cli so
+# install-extras.sh --remove can put the originals back.
+
+set -u
+
+THEME_DIR="$HOME/.local/state/omarchy/current/theme"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy/aether-cli"
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}"
+
+mkdir -p "$STATE_DIR" 2>/dev/null
+
+# Read the theme palette into a `colors[key]=value` table.
+declare -A colors=()
+load_colors() {
+  local key value
+  [[ -f $THEME_DIR/colors.toml ]] || return 1
+  while IFS=$'\t' read -r key value; do
+    [[ -n $key && -n $value ]] || continue
+    colors[$key]="$value"
+  done < <(omarchy-theme-color --file "$THEME_DIR/colors.toml" --all 2>/dev/null)
+  [[ -n ${colors[accent]:-} && -n ${colors[background]:-} ]]
+}
+
+# Backup-once bookkeeping: $1 is the state key, $2 the live file. Returns 0
+# when this call owns the file (recorded now or earlier).
+takeover_record() {
+  local key="$1" file="$2" backup
+  [[ -f $file ]] || { : >"$STATE_DIR/$key"; return 0; }
+  backup="$STATE_DIR/$key.orig"
+  cp -p "$file" "$backup" 2>/dev/null || return 1
+  printf '%s\n' "$backup" >"$STATE_DIR/$key"
+}
+
+# Restore what a key owned, if anything, and forget it.
+restore_record() {
+  local key="$1" file="$2" backup
+  [[ -f $STATE_DIR/$key ]] || return 0
+  backup="$(<"$STATE_DIR/$key")"
+  if [[ -n $backup && -f $backup ]]; then
+    cp -p "$backup" "$file"
+  else
+    rm -f "$file"
+  fi
+  rm -f "$STATE_DIR/$key" "$STATE_DIR/$key.orig"
+}
+
+# ── fastfetch ────────────────────────────────────────────────────────────────
+sync_fastfetch() {
+  local ff_dir="$CONFIG_DIR/fastfetch"
+  local ff_conf="$ff_dir/config.jsonc"
+  local ff_state="$STATE_DIR/fastfetch"
+
+  if [[ -f $THEME_DIR/fastfetch.jsonc ]]; then
+    mkdir -p "$ff_dir"
+
+    # A config we never recorded belongs to the user: back it up once, then
+    # take over, exactly as install-extras.sh would.
+    if [[ ! -f $ff_state && -f $ff_conf ]] && ! grep -qF 'omarchy-cli retint' "$ff_conf"; then
+      takeover_record fastfetch "$ff_conf" || return 0
+    elif [[ ! -f $ff_state ]]; then
+      : >"$ff_state"
+    fi
+
+    cp "$THEME_DIR/fastfetch.jsonc" "$ff_conf"
+  elif [[ -f $ff_conf && -f $ff_state ]]; then
+    # The active theme ships no emblem: hand the config back.
+    restore_record fastfetch "$ff_conf"
+  fi
+}
+
+# ── cava ─────────────────────────────────────────────────────────────────────
+sync_cava() {
+  local cava_dir="$CONFIG_DIR/cava"
+  local themes_dir="$cava_dir/themes"
+  local theme_file="$themes_dir/omarchy-current"
+  local accent magenta foreground stops
+
+  load_colors || return 0
+  accent=${colors[accent]}
+  magenta=${colors[magenta]:-${colors[purple]:-}}
+  foreground=${colors[foreground]}
+  [[ -n $accent && -n $magenta && -n $foreground ]] || return 0
+
+  # Eight stops from the accent to magenta, blended exactly like Omarchy's
+  # template renderer blends mix() tokens.
+  stops=$(awk -v s="${accent#\#}" -v e="${magenta#\#}" '
+    function hv(c) { return index("0123456789abcdef", tolower(c)) - 1 }
+    BEGIN {
+      n = 8
+      for (i = 0; i < n; i++) {
+        a = i / (n - 1)
+        r = int((hv(substr(s, 1, 1)) * 16 + hv(substr(s, 2, 1))) * (1 - a) + (hv(substr(e, 1, 1)) * 16 + hv(substr(e, 2, 1))) * a + 0.5)
+        g = int((hv(substr(s, 3, 1)) * 16 + hv(substr(s, 4, 1))) * (1 - a) + (hv(substr(e, 3, 1)) * 16 + hv(substr(e, 4, 1))) * a + 0.5)
+        b = int((hv(substr(s, 5, 1)) * 16 + hv(substr(s, 6, 1))) * (1 - a) + (hv(substr(e, 5, 1)) * 16 + hv(substr(e, 6, 1))) * a + 0.5)
+        printf "#%02x%02x%02x\n", r, g, b
+      }
+    }') || return 0
+  [[ $stops == *'#'* ]] || return 0
+
+  mkdir -p "$themes_dir"
+  {
+    printf '# omarchy-cli retint — rendered from the active theme (%s)\n' "$(cat "$HOME/.local/state/omarchy/current/theme.name" 2>/dev/null || echo '?')"
+    printf '# Selected by theme = omarchy-current in ~/.config/cava/config.\n'
+    printf '[color]\n'
+    printf '# background stays unset so the visualizer sits on the terminal glass\n'
+    printf "foreground = '%s'\n" "$foreground"
+    printf 'gradient = 1\n'
+    local i=1
+    while IFS= read -r stop; do
+      printf "gradient_color_%d = '%s'\n" "$i" "$stop"
+      (( i++ ))
+    done <<<"$stops"
+  } >"$theme_file"
+}
+
+# ── lazygit ──────────────────────────────────────────────────────────────────
+sync_lazygit() {
+  local lg_dir="$CONFIG_DIR/lazygit"
+  local lg_conf="$lg_dir/config.yml"
+  local lg_state="$STATE_DIR/lazygit"
+  local marker='omarchy-cli retint'
+
+  load_colors || return 0
+
+  if [[ -s $lg_conf ]] && ! grep -qF "$marker" "$lg_conf"; then
+    return 0 # A real user config is in place; leave it alone.
+  fi
+
+  if [[ ! -f $lg_state ]]; then
+    takeover_record lazygit "$lg_conf" || return 0
+  fi
+
+  mkdir -p "$lg_dir"
+  {
+    printf '# %s <<< — managed by ~/.config/omarchy/hooks/theme-set.d/50-aether-cli-retints\n' "$marker"
+    printf '# Rendered from the active theme. A real user config can replace this file;\n'
+    printf '# the hook only rewrites files it rendered or found empty.\n\n'
+    printf 'gui:\n'
+    printf '  theme:\n'
+    printf '    activeBorderColor:\n'
+    printf '      - "%s"\n' "${colors[accent]}"
+    printf '      - bold\n'
+    printf '    inactiveBorderColor:\n'
+    printf '      - "%s"\n' "${colors[color8]:-${colors[muted]}}"
+    printf '    searchingActiveBorderColor:\n'
+    printf '      - "%s"\n' "${colors[yellow]}"
+    printf '      - bold\n'
+    printf '    optionsTextColor:\n'
+    printf '      - "%s"\n' "${colors[accent]}"
+    printf '    selectedLineBgColor:\n'
+    printf '      - "%s"\n' "${colors[selection_background]:-${colors[selection]}}"
+    printf '    selectedRangeBgColor:\n'
+    printf '      - "%s"\n' "${colors[selection_background]:-${colors[selection]}}"
+    printf '    cherryPickCommitBgColor:\n'
+    printf '      - "%s"\n' "${colors[magenta]}"
+    printf '    cherryPickCommitFgColor:\n'
+    printf '      - "%s"\n' "${colors[bright_foreground]}"
+    printf '    markCommitBgColor:\n'
+    printf '      - "%s"\n' "${colors[accent]}"
+    printf '    markCommitFgColor:\n'
+    printf '      - "%s"\n' "${colors[background]}"
+    printf '    copySelectedButtonBgColor:\n'
+    printf '      - "%s"\n' "${colors[cyan]}"
+    printf '    copySelectedButtonFgColor:\n'
+    printf '      - "%s"\n' "${colors[background]}"
+    printf '    defaultTextColor:\n'
+    printf '      - "%s"\n' "${colors[foreground]}"
+  } >"$lg_conf"
+}
+
+# ── floating bar ─────────────────────────────────────────────────────────────
+# The active theme can ship a patched clone of Omarchy's bar engine
+# (extras/bar/: the strip floats inset from the screen edge with rounded
+# ends). While such a theme is active the clone is the bar with a glassy
+# background; when the active theme ships none, the stock engine comes back
+# with the bar background the user had before Aether ever took over —
+# recorded the first time Aether switches away from a non-glassy setting.
+# Only `bar.id` and `bar.background` flip, and only when they differ — the
+# widget layout is the user's and stays untouched.
+
+BAR_ID="${USER:-$(id -un)}.bar"
+SHELL_JSON="$CONFIG_DIR/omarchy/shell.json"
+BAR_PRIOR="$STATE_DIR/bar-background"
+
+bar_config_value() {
+  [[ -f $SHELL_JSON ]] || return 0
+  jq -r --arg key "$1" '.bar[$key] // ""' "$SHELL_JSON" 2>/dev/null
+}
+
+sync_bar() {
+  local active_id want_bg
+  active_id="$(bar_config_value id)"
+  [[ -n $active_id ]] || active_id=omarchy.bar
+
+  if [[ -f $THEME_DIR/extras/bar/manifest.json && -d $CONFIG_DIR/omarchy/plugins/$BAR_ID ]]; then
+    # Entering Aether from another bar: note the background that held outside,
+    # so leaving Aether can put back whatever it was set to be.
+    if [[ $active_id != "$BAR_ID" ]]; then
+      want_bg="$(bar_config_value background)"
+      if [[ -n $want_bg && $want_bg != glassy ]]; then
+        printf '%s\n' "$want_bg" >"$BAR_PRIOR"
+      fi
+    fi
+    if [[ $active_id != "$BAR_ID" ]]; then
+      omarchy bar use "$BAR_ID" >/dev/null 2>&1 || true
+    fi
+    if [[ $(bar_config_value background) != glassy ]]; then
+      omarchy bar background glassy >/dev/null 2>&1 || true
+    fi
+  elif [[ $active_id == "$BAR_ID" ]]; then
+    omarchy bar use omarchy.bar >/dev/null 2>&1 || true
+    want_bg=opaque
+    [[ -r $BAR_PRIOR ]] && want_bg="$(<"$BAR_PRIOR")"
+    case $want_bg in
+      opaque | glassy | none) ;;
+      *) want_bg=opaque ;;
+    esac
+    if [[ $(bar_config_value background) != "$want_bg" ]]; then
+      omarchy bar background "$want_bg" >/dev/null 2>&1 || true
+    fi
+  fi
+}
+
+# ── screensaver ──────────────────────────────────────────────────────────────
+# The screensaver art in ~/.config/omarchy/branding/screensaver.txt is a
+# single user file, so a theme's wordmark would otherwise stick to every
+# theme. While the active theme ships one (extras/screensaver.txt) it is the
+# screensaver; other themes get back what the user had before — the copy the
+# installer backed up, or the stock Omarchy logo when there is no record.
+# A running screensaver is restarted so it picks the new art up at once.
+
+SAVER="$CONFIG_DIR/omarchy/branding/screensaver.txt"
+SAVER_BACKUP_STATE="$CONFIG_DIR/omarchy/branding/.aether-screensaver-backup"
+
+file_hash() {
+  [[ -f $1 ]] || return 1
+  md5sum "$1" 2>/dev/null | cut -d' ' -f1
+}
+
+restart_screensaver() {
+  pgrep -f '[o]rg.omarchy.screensaver' >/dev/null 2>&1 || return 0
+  pkill -f '[o]rg.omarchy.screensaver' 2>/dev/null
+  pkill -x ttfx 2>/dev/null
+  sleep 0.3
+  omarchy-launch-screensaver force >/dev/null 2>&1 || true
+}
+
+sync_screensaver() {
+  local want backup
+  if [[ -f $THEME_DIR/extras/screensaver.txt ]]; then
+    [[ $(file_hash "$SAVER") == $(file_hash "$THEME_DIR/extras/screensaver.txt") ]] && return 0
+    # Standalone installs (hook without the screensaver extra) still must not
+    # lose what was there: back it up the same way the installer does.
+    if [[ ! -s $SAVER_BACKUP_STATE ]]; then
+      backup="$SAVER.aether-backup-$(date +%Y%m%d-%H%M%S)"
+      [[ -f $SAVER ]] && cp -p "$SAVER" "$backup" && printf '%s\n' "$backup" >"$SAVER_BACKUP_STATE"
+    fi
+    cp "$THEME_DIR/extras/screensaver.txt" "$SAVER"
+    restart_screensaver
+  else
+    [[ -r $SAVER_BACKUP_STATE ]] || return 0
+    backup="$(<"$SAVER_BACKUP_STATE")"
+    [[ -n $backup && -f $backup ]] || return 0
+    [[ $(file_hash "$SAVER") == $(file_hash "$backup") ]] && return 0
+    cp -p "$backup" "$SAVER"
+    restart_screensaver
+  fi
+}
+
+# ── terminals ────────────────────────────────────────────────────────────────
+# Terminal configs are includes of the staged theme's own files, so palette
+# and opacity already follow every theme switch; Omarchy reloads the
+# terminals itself right after the theme lands. This second, last-in-line
+# nudge heals a terminal whose reload raced the snapshot swap (back-to-back
+# switches can land one while the theme directory is being replaced, and
+# kitty keeps its previous config when an include cannot be read).
+
+sync_terminals() {
+  command -v omarchy-restart-terminal >/dev/null 2>&1 || return 0
+  omarchy-restart-terminal >/dev/null 2>&1 || true
+}
+
+case "${1:-}" in
+  fastfetch) sync_fastfetch ;;
+  cava) sync_cava ;;
+  lazygit) sync_lazygit ;;
+  bar) sync_bar ;;
+  screensaver) sync_screensaver ;;
+  terminals) sync_terminals ;;
+  # No argument, or the theme name Omarchy's hook passes in — retint everything.
+  *) sync_fastfetch; sync_cava; sync_lazygit; sync_bar; sync_screensaver; sync_terminals ;;
+esac
+
+exit 0
