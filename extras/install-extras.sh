@@ -8,6 +8,10 @@
 # Optional pieces:
 #   gtk4/gtk3    libadwaita + GTK3 colour tokens in gtk.css
 #   screensaver  TTE wordmark at ~/.config/omarchy/branding/screensaver.txt
+#   about        About override: cloud emblem config + launcher, wired into the
+#                menu extension (no user@host line in the About panel)
+#   bar          the floating bar engine clone (~/.config/omarchy/plugins/<user>.bar),
+#                activated by the hook only while this theme is active
 #   fastfetch    the emblem config as the user fastfetch config (backed up)
 #   cava         selects themes/omarchy-current, which the theme hook renders
 #                from the active palette on every theme switch
@@ -164,6 +168,109 @@ remove_screensaver() {
   rm -f "$SAVER_STATE"
 }
 
+# ── About override ───────────────────────────────────────────────────────────
+# The Omarchy menu's About action gets a dedicated launcher + config: the same
+# pixel-cloud emblem as the fetch config, but without the user@host line. The
+# menu extension merges a single "about" key on top of the stock menu — the
+# exact override pattern the extension template's own header documents.
+ABOUT_DST="$BRAND_DIR/aether-about.jsonc"
+ABOUT_LAUNCHER_DST="$BRAND_DIR/aether-about-launcher"
+ABOUT_SESSION_DST="$BRAND_DIR/aether-about-session"
+MENU_EXT="$HOME/.config/omarchy/extensions/omarchy-menu.jsonc"
+
+install_about() {
+  mkdir -p "$BRAND_DIR" "${MENU_EXT%/*}"
+  record_backup about-config "$ABOUT_DST"
+  cp "$ROOT/extras/about/aether-about.jsonc" "$ABOUT_DST"
+  record_backup about-launcher "$ABOUT_LAUNCHER_DST"
+  cp "$ROOT/extras/about/aether-about-launcher" "$ABOUT_LAUNCHER_DST"
+  chmod +x "$ABOUT_LAUNCHER_DST"
+  record_backup about-session "$ABOUT_SESSION_DST"
+  cp "$ROOT/extras/about/aether-about-session" "$ABOUT_SESSION_DST"
+  chmod +x "$ABOUT_SESSION_DST"
+  record_backup about-menu "$MENU_EXT"
+  if grep -qE '^[[:space:]]*"about"' "$MENU_EXT" 2>/dev/null; then
+    say "menu extension already defines about — left untouched"
+  else
+    # The extension file is JSONC (comments are fine for the shell parser, not
+    # for jq), so the override is inserted textually before the first bare
+    # closing brace — the template file's final line. The icon mirrors the
+    # stock About row's Nerd Font glyph (U+F534).
+    local entry icon tmp
+    icon=$'\uF534'
+    printf -v entry '  "about": {"icon":"%s","label":"About","action":"%s"},' "$icon" "$ABOUT_LAUNCHER_DST"
+    tmp="$(mktemp)"
+    awk -v entry="$entry" '!done && /^}[[:space:]]*$/ { print entry; done=1 } { print }' \
+      "$MENU_EXT" >"$tmp"
+    mv "$tmp" "$MENU_EXT"
+    say "wired About → $ABOUT_LAUNCHER_DST (hot-reloads)"
+  fi
+}
+
+remove_about() {
+  restore_key about-config "$ABOUT_DST"
+  restore_key about-launcher "$ABOUT_LAUNCHER_DST"
+  restore_key about-session "$ABOUT_SESSION_DST"
+  restore_key about-menu "$MENU_EXT"
+}
+
+# ── Floating bar ─────────────────────────────────────────────────────────────
+# The theme ships a patched clone of Omarchy's bar engine (extras/bar/, made
+# with `omarchy plugin clone omarchy.bar`): the strip floats inset from the
+# screen edge with fully rounded ends instead of hugging it full-width. The
+# clone is copied to ~/.config/omarchy/plugins/<user>.bar and activated by the
+# theme hook only while a theme that ships extras/bar is active — every other
+# theme keeps the stock edge-hugging bar. A clone you already had is backed up
+# whole and put back by --remove.
+BAR_SRC="$ROOT/extras/bar"
+BAR_PLUGIN="$HOME/.config/omarchy/plugins/${USER:-$(id -un)}.bar"
+BAR_STATE="$STATE_DIR/bar"
+
+install_bar() {
+  [[ -d $BAR_SRC ]] || { say "bar: this theme ships no bar clone"; return 0; }
+  mkdir -p "$STATE_DIR" "${BAR_PLUGIN%/*}"
+  if [[ ! -f $BAR_STATE ]]; then
+    if [[ -d $BAR_PLUGIN ]]; then
+      tar -czf "$STATE_DIR/bar-user.orig.tar.gz" -C "${BAR_PLUGIN%/*}" "${BAR_PLUGIN##*/}"
+      printf '%s\n' "$STATE_DIR/bar-user.orig.tar.gz" >"$BAR_STATE"
+      say "backed up your existing ${BAR_PLUGIN##*/} clone"
+    else
+      : >"$BAR_STATE"
+    fi
+  fi
+  rm -rf "$BAR_PLUGIN"
+  cp -a "$BAR_SRC" "$BAR_PLUGIN"
+  # Clone ids carry the username, the way omarchy plugin clone names them.
+  local owner="${USER:-$(id -un)}"
+  if [[ $owner != krxsh ]]; then
+    sed -i "s/\"id\": \"krxsh.bar\"/\"id\": \"$owner.bar\"/" "$BAR_PLUGIN/manifest.json"
+  fi
+  say "installed the floating bar engine (${BAR_PLUGIN/#$HOME/\~})"
+  # Activate now if the hook is installed: it flips bar.id/background only
+  # while the active theme ships extras/bar.
+  local hook="$HOME/.config/omarchy/hooks/theme-set.d/50-aether-cli-retints"
+  [[ -x $hook ]] && "$hook" >/dev/null 2>&1 || true
+}
+
+remove_bar() {
+  [[ -f $BAR_STATE ]] || { say "bar: nothing to remove"; return 0; }
+  local owner="${USER:-$(id -un)}" backup
+  backup="$(<"$BAR_STATE")"
+  if [[ -n $backup && -f $backup ]]; then
+    tar -xzf "$backup" -C "${BAR_PLUGIN%/*}"
+    say "restored your previous ${BAR_PLUGIN##*/} clone"
+  else
+    rm -rf "$BAR_PLUGIN"
+    say "removed ~${BAR_PLUGIN/#$HOME/~}"
+  fi
+  rm -f "$BAR_STATE"
+  # Hand the stock bar back if the clone was the active one.
+  if jq -r '.bar.id // ""' "$HOME/.config/omarchy/shell.json" 2>/dev/null | grep -qx "$owner.bar"; then
+    omarchy bar use omarchy.bar >/dev/null 2>&1 || true
+    omarchy bar background opaque >/dev/null 2>&1 || true
+  fi
+}
+
 # ── CLI retints ──────────────────────────────────────────────────────────────
 install_hook() {
   [[ -f $HOOK_SRC ]] || { echo "install-extras: missing $HOOK_SRC" >&2; exit 1; }
@@ -270,6 +377,8 @@ before the first change; --remove undoes everything this installer records.
   gtk4          libadwaita colour tokens in ~/.config/gtk-4.0/gtk.css
   gtk3          GTK3 fallback tokens in ~/.config/gtk-3.0/gtk.css
   screensaver   extras/screensaver.txt as the TTE screensaver wordmark
+  about         the About override: pixel-cloud emblem, no user@host line
+  bar           the floating bar: patched bar-engine clone, hook-gated
   fastfetch     the theme emblem as your fastfetch config
   cava          point cava at the hook-rendered themes/omarchy-current
   lazygit       seed the empty lazygit config with themed colours
@@ -286,6 +395,8 @@ USAGE
 DO_GTK4=0
 DO_GTK3=0
 DO_SAVER=0
+DO_ABOUT=0
+DO_BAR=0
 DO_CLI=0
 DO_ACTIVATE=0
 DO_HOOK=0
@@ -295,6 +406,8 @@ if (( $# == 0 )); then
   DO_GTK4=1
   DO_GTK3=1
   DO_SAVER=1
+  DO_ABOUT=1
+  DO_BAR=1
   DO_CLI=1
   DO_ACTIVATE=1
   DO_HOOK=1
@@ -305,11 +418,13 @@ while (( $# > 0 )); do
     gtk | gtk4) DO_GTK4=1 ;;
     gtk3) DO_GTK3=1 ;;
     screensaver) DO_SAVER=1 ;;
+    about) DO_ABOUT=1 ;;
+    bar) DO_BAR=1 ;;
     fastfetch | cava | lazygit) DO_CLI=1; DO_HOOK=1 ;;
     claude | pi | hermes | fcitx5) DO_ACTIVATE=1; DO_HOOK=1 ;;
     hook) DO_HOOK=1; DO_CLI=1 ;;
     all)
-      DO_GTK4=1; DO_GTK3=1; DO_SAVER=1; DO_CLI=1; DO_ACTIVATE=1; DO_HOOK=1
+      DO_GTK4=1; DO_GTK3=1; DO_SAVER=1; DO_ABOUT=1; DO_BAR=1; DO_CLI=1; DO_ACTIVATE=1; DO_HOOK=1
       ;;
     --remove | remove) REMOVE=1 ;;
     -h | --help) usage; exit 0 ;;
@@ -322,6 +437,8 @@ if (( REMOVE )); then
   remove_css "$GTK4" "gtk4"
   remove_css "$GTK3" "gtk3"
   remove_screensaver
+  remove_about
+  remove_bar
   remove_hook
   remove_cli_files
   remove_activation
@@ -331,6 +448,8 @@ if (( REMOVE )); then
 fi
 
 (( DO_HOOK )) && install_hook
+(( DO_ABOUT )) && install_about
+(( DO_BAR )) && install_bar
 (( DO_CLI )) && run_retints
 (( DO_ACTIVATE )) && { install_claude; install_pi; install_hermes; install_fcitx5; }
 (( DO_CLI )) && install_cava_select

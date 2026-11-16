@@ -15,6 +15,15 @@
 #              which a one-time installer line in cava's config selects
 #   lazygit    ~/.config/lazygit/config.yml is rendered from the palette
 #              when the file is empty or already hook-managed
+#   bar        when the theme ships extras/bar (the floating bar-engine
+#              clone), it is selected as the bar with a glassy background;
+#              themes without it get the stock engine back with the bar
+#              background the user had before Aether took over
+#   screensaver while the theme ships extras/screensaver.txt it is the
+#              screensaver wordmark; other themes get the user's previous
+#              art (installer backup, else the stock Omarchy logo) back
+#   terminals  a last-in-line config reload that heals a terminal whose
+#              reload raced the theme swap and kept its previous look
 #
 # Every takeover is recorded in ~/.local/state/omarchy/aether-cli so
 # install-extras.sh --remove can put the originals back.
@@ -186,12 +195,127 @@ sync_lazygit() {
   } >"$lg_conf"
 }
 
+# ── floating bar ─────────────────────────────────────────────────────────────
+# The active theme can ship a patched clone of Omarchy's bar engine
+# (extras/bar/: the strip floats inset from the screen edge with rounded
+# ends). While such a theme is active the clone is the bar with a glassy
+# background; when the active theme ships none, the stock engine comes back
+# with the bar background the user had before Aether ever took over —
+# recorded the first time Aether switches away from a non-glassy setting.
+# Only `bar.id` and `bar.background` flip, and only when they differ — the
+# widget layout is the user's and stays untouched.
+
+BAR_ID="${USER:-$(id -un)}.bar"
+SHELL_JSON="$CONFIG_DIR/omarchy/shell.json"
+BAR_PRIOR="$STATE_DIR/bar-background"
+
+bar_config_value() {
+  [[ -f $SHELL_JSON ]] || return 0
+  jq -r --arg key "$1" '.bar[$key] // ""' "$SHELL_JSON" 2>/dev/null
+}
+
+sync_bar() {
+  local active_id want_bg
+  active_id="$(bar_config_value id)"
+  [[ -n $active_id ]] || active_id=omarchy.bar
+
+  if [[ -f $THEME_DIR/extras/bar/manifest.json && -d $CONFIG_DIR/omarchy/plugins/$BAR_ID ]]; then
+    # Entering Aether from another bar: note the background that held outside,
+    # so leaving Aether can put back whatever it was set to be.
+    if [[ $active_id != "$BAR_ID" ]]; then
+      want_bg="$(bar_config_value background)"
+      if [[ -n $want_bg && $want_bg != glassy ]]; then
+        printf '%s\n' "$want_bg" >"$BAR_PRIOR"
+      fi
+    fi
+    if [[ $active_id != "$BAR_ID" ]]; then
+      omarchy bar use "$BAR_ID" >/dev/null 2>&1 || true
+    fi
+    if [[ $(bar_config_value background) != glassy ]]; then
+      omarchy bar background glassy >/dev/null 2>&1 || true
+    fi
+  elif [[ $active_id == "$BAR_ID" ]]; then
+    omarchy bar use omarchy.bar >/dev/null 2>&1 || true
+    want_bg=opaque
+    [[ -r $BAR_PRIOR ]] && want_bg="$(<"$BAR_PRIOR")"
+    case $want_bg in
+      opaque | glassy | none) ;;
+      *) want_bg=opaque ;;
+    esac
+    if [[ $(bar_config_value background) != "$want_bg" ]]; then
+      omarchy bar background "$want_bg" >/dev/null 2>&1 || true
+    fi
+  fi
+}
+
+# ── screensaver ──────────────────────────────────────────────────────────────
+# The screensaver art in ~/.config/omarchy/branding/screensaver.txt is a
+# single user file, so a theme's wordmark would otherwise stick to every
+# theme. While the active theme ships one (extras/screensaver.txt) it is the
+# screensaver; other themes get back what the user had before — the copy the
+# installer backed up, or the stock Omarchy logo when there is no record.
+# A running screensaver is restarted so it picks the new art up at once.
+
+SAVER="$CONFIG_DIR/omarchy/branding/screensaver.txt"
+SAVER_BACKUP_STATE="$CONFIG_DIR/omarchy/branding/.aether-screensaver-backup"
+
+file_hash() {
+  [[ -f $1 ]] || return 1
+  md5sum "$1" 2>/dev/null | cut -d' ' -f1
+}
+
+restart_screensaver() {
+  pgrep -f '[o]rg.omarchy.screensaver' >/dev/null 2>&1 || return 0
+  pkill -f '[o]rg.omarchy.screensaver' 2>/dev/null
+  pkill -x ttfx 2>/dev/null
+  sleep 0.3
+  omarchy-launch-screensaver force >/dev/null 2>&1 || true
+}
+
+sync_screensaver() {
+  local want backup
+  if [[ -f $THEME_DIR/extras/screensaver.txt ]]; then
+    [[ $(file_hash "$SAVER") == $(file_hash "$THEME_DIR/extras/screensaver.txt") ]] && return 0
+    # Standalone installs (hook without the screensaver extra) still must not
+    # lose what was there: back it up the same way the installer does.
+    if [[ ! -s $SAVER_BACKUP_STATE ]]; then
+      backup="$SAVER.aether-backup-$(date +%Y%m%d-%H%M%S)"
+      [[ -f $SAVER ]] && cp -p "$SAVER" "$backup" && printf '%s\n' "$backup" >"$SAVER_BACKUP_STATE"
+    fi
+    cp "$THEME_DIR/extras/screensaver.txt" "$SAVER"
+    restart_screensaver
+  else
+    [[ -r $SAVER_BACKUP_STATE ]] || return 0
+    backup="$(<"$SAVER_BACKUP_STATE")"
+    [[ -n $backup && -f $backup ]] || return 0
+    [[ $(file_hash "$SAVER") == $(file_hash "$backup") ]] && return 0
+    cp -p "$backup" "$SAVER"
+    restart_screensaver
+  fi
+}
+
+# ── terminals ────────────────────────────────────────────────────────────────
+# Terminal configs are includes of the staged theme's own files, so palette
+# and opacity already follow every theme switch; Omarchy reloads the
+# terminals itself right after the theme lands. This second, last-in-line
+# nudge heals a terminal whose reload raced the snapshot swap (back-to-back
+# switches can land one while the theme directory is being replaced, and
+# kitty keeps its previous config when an include cannot be read).
+
+sync_terminals() {
+  command -v omarchy-restart-terminal >/dev/null 2>&1 || return 0
+  omarchy-restart-terminal >/dev/null 2>&1 || true
+}
+
 case "${1:-}" in
   fastfetch) sync_fastfetch ;;
   cava) sync_cava ;;
   lazygit) sync_lazygit ;;
+  bar) sync_bar ;;
+  screensaver) sync_screensaver ;;
+  terminals) sync_terminals ;;
   # No argument, or the theme name Omarchy's hook passes in — retint everything.
-  *) sync_fastfetch; sync_cava; sync_lazygit ;;
+  *) sync_fastfetch; sync_cava; sync_lazygit; sync_bar; sync_screensaver; sync_terminals ;;
 esac
 
 exit 0

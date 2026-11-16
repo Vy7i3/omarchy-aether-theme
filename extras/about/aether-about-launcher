@@ -1,0 +1,38 @@
+#!/bin/bash
+# Aether About — pixel-cloud emblem, no user@host.
+#
+# Wired in by extras/install-extras.sh as the Omarchy menu's About action.
+# Aether-only by design: when another theme is active this delegates to
+# Omarchy's own omarchy-launch-about, so every other theme keeps its stock
+# About panel (its own config, logo, sheen and measured fit) untouched.
+#
+# The Aether panel carries its own app-id (org.aether.about): the stock
+# omarchy-launch-about keys its focus-and-resize on org.omarchy.about, so
+# sharing the id made each side focus (and restyle) the other's window —
+# an About opened from the launcher could come up with the wrong logo
+# whenever a stale panel of the other kind was open. Separate ids keep the
+# focus chains independent: a second press still focuses the Aether window,
+# and the stock pipeline's sizing is never shadowed by ours.
+#
+# The Aether branch applies a fixed size rule (800x360), recreated each
+# launch with the stale rule disabled first. Because the app-id is its own,
+# the rule also carries the float and center that the stock pipeline gives
+# org.omarchy.about windows (default/hypr/apps/system.lua) — without them
+# the panel opens tiled and the size cannot stick. On delegation the rule is
+# disabled again.
+
+THEME_STATE="$HOME/.local/state/omarchy/current/theme.name"
+CONFIG="$HOME/.config/omarchy/branding/aether-about.jsonc"
+SESSION="$HOME/.config/omarchy/branding/aether-about-session"
+APP_ID=org.aether.about
+
+active=""
+[[ -r $THEME_STATE ]] && active="$(<"$THEME_STATE")"
+if [[ $active != aether || ! -f $CONFIG || ! -x $SESSION ]]; then
+  hyprctl eval 'if omarchy_aether_about_rule then omarchy_aether_about_rule:set_enabled(false) end' >/dev/null 2>&1
+  exec omarchy-launch-about "$@"
+fi
+
+hyprctl eval "if omarchy_aether_about_rule then omarchy_aether_about_rule:set_enabled(false) end; omarchy_aether_about_rule = hl.window_rule({ match = { class = \"$APP_ID\" }, float = true, center = true, size = { 800, 360 } })" >/dev/null 2>&1
+
+exec omarchy-launch-or-focus-tui --app-id=$APP_ID "$SESSION"

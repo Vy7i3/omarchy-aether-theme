@@ -8,8 +8,9 @@ electric cyan, neon violet, and glass that stays readable.
 Aether is a complete local Omarchy theme: it themes the compositor, the shell,
 the lock card, terminals, btop, Helix, Chromium and GTK, and it ships three
 wallpapers plus a Plymouth wordmark. It also carries a **fastfetch emblem** — a
-cyan → violet ANSI-shadow wordmark — that replaces both `fastfetch` output and
-the Omarchy menu's About window when the theme is applied, and it retints the
+pixel cloud lit cyan at its hump and shading violet at its base — that replaces
+`fastfetch` output and, through the extras About override, the Omarchy menu's
+About panel, and it retints the
 CLI tools Omarchy does not cover natively (cava, lazygit) through a theme hook.
 The palette is defined once in `colors.toml`; Omarchy renders Neovim, VS Code,
 tmux, fzf, gum, Obsidian and the rest from that file when the theme is applied.
@@ -84,7 +85,9 @@ To go back, apply any other theme from `omarchy theme switcher` or
 | `shell.hyprland.toml` | Keeps `active-border-foreground` readable when the border is a gradient |
 | `chromium.theme` | Browser UI tint (`7,11,20`) |
 | `icons.theme` | Icon theme (`Yaru-purple`) |
-| `fastfetch.jsonc` | The emblem: gradient ANSI-shadow wordmark + themed module keys |
+| `fastfetch.jsonc` | The emblem: pixel cloud + themed module keys (keeps the user@host line) |
+| `extras/about/` | The About panel: same emblem, no user@host, plus its launcher |
+| `extras/bar/` | The floating bar: patched clone of Omarchy's bar engine, hook-gated |
 | `obsidian.css` | Obsidian vault theme (synced to every vault by `omarchy-theme-set-obsidian`) |
 | `fcitx5-theme.conf` | Input-method candidate window palette |
 | `claude.json` | Claude Code theme (`custom:omarchy`) |
@@ -117,18 +120,36 @@ first group is Omarchy's own pipeline, the second is Aether's theme hook
 | Hermes | Theme's `hermes.yaml` synced as the "omarchy" skin |
 | Chromium / Brave / Chrome / Edge | `chromium.theme` browser retint |
 | Keyboard RGB | `omarchy-theme-set-keyboard` from `colors.toml` |
-| **fastfetch + About window** | Theme hook: emblem config → `~/.config/fastfetch/config.jsonc` |
+| **fastfetch** | Theme hook: emblem config → `~/.config/fastfetch/config.jsonc` (keeps user@host) |
+| **About panel** | Extras: cloud emblem config + launcher, wired into the menu's About action (no user@host) |
 | **cava** | Theme hook: palette → `themes/omarchy-current` |
 | **lazygit** | Theme hook: colours → `~/.config/lazygit/config.yml` |
+| **Screensaver** | Theme hook: the Aether wordmark while Aether is active, your previous art otherwise |
 
 Notes:
 
 - fastfetch has no built-in Omarchy consumer, so the theme hook installs the
-  emblem config as the user fastfetch config. Omarchy's About window detects a
-  user config and renders it as-is, so the same emblem appears in the menu's
-  About screen (the stock sheen animation stays off for custom layouts, and the
-  window sizes from Omarchy's float rule). Delete
-  `~/.config/fastfetch/config.jsonc` to return to the stock About window.
+  emblem config as the user fastfetch config. That output keeps the
+  `user@host` title line. The About panel is handled separately by the
+  `about` extra: `install-extras.sh about` copies a dedicated config and
+  launcher into `~/.config/omarchy/branding/` and re-points the menu's
+  About action at them via a one-key override in
+  `~/.config/omarchy/extensions/omarchy-menu.jsonc` (the extension template's
+  own documented pattern). The result: the same pixel-cloud emblem, no
+  `user@host` line, and a window sized by the launcher's own rule instead of
+  Omarchy's measured-fit pipeline. The panel stays open until closed with the
+  window-close keybind (a session script holds the window the way
+  omarchy-launch-about's render loop does). The panel carries its own app-id
+  (`org.aether.about`) so its focus chain never grabs — or gets grabbed by —
+  the stock panel's window: an About opened from the launcher is always the
+  Aether panel, and the stock pipeline's measured-fit sizing is never
+  shadowed. The override is **Aether-only**: under any other theme the
+  launcher delegates to the stock
+  `omarchy-launch-about` — other themes keep their own About panel untouched —
+  and it falls back to the stock panel too if Aether's files are missing.
+  `install-extras.sh --remove` restores the stock About action; deleting
+  `~/.config/fastfetch/config.jsonc` returns fastfetch to Omarchy's stock
+  output (the About panel is independent of that file).
 - Claude Code, Pi and fcitx5 only *use* the synced file once their own theme is
   pointed at `omarchy` — `install-extras.sh` does that activation for you
   (backing up your settings first); the theme-set pipeline keeps the colours in
@@ -159,7 +180,9 @@ omarchy bar background glassy                 # glassier bar
 ```
 
 Those toggles are optional. Turning them off leaves Aether's baked-in glass
-intact.
+intact. With the bar extra installed (see *Optional extras*), Aether already
+ships the glassy bar background through its hook, and cycles or explicit
+settings win while another theme is active.
 
 To adjust the terminal glass, edit the opacity line in each terminal file and
 re-apply the theme:
@@ -207,7 +230,11 @@ These are three different surfaces, and Aether treats them separately:
   omarchy screensaver   # preview
   ```
 
-  Use `omarchy branding screensaver reset` to return to the stock Omarchy art.
+  Once the hook is installed, the wordmark also **follows theme switches**:
+  it is the screensaver while Aether is active, and any other theme gets your
+  previous art back (the copy the installer backed up — or the stock Omarchy
+  logo when there is no record). `omarchy branding screensaver reset` returns
+  to the stock art; the hook re-asserts Aether's wordmark on the next switch.
 
 ## Wallpapers
 
@@ -257,7 +284,8 @@ rewrites `unlock.png`, both previews and `backgrounds/omarchy.webp` in place.
 ## Optional extras
 
 Install everything optional (GTK palette, screensaver wordmark, fastfetch
-emblem, cava/lazygit retints, hook, and the agent-theme activations):
+emblem, floating bar, cava/lazygit retints, hook, and the agent-theme
+activations):
 
 ```bash
 ~/.config/omarchy/themes/aether/extras/install-extras.sh
@@ -266,13 +294,16 @@ emblem, cava/lazygit retints, hook, and the agent-theme activations):
 The installer backs up every file it touches (records kept in
 `~/.local/state/omarchy/aether-cli/` and next to the GTK files), injects its GTK
 changes inside removable marker blocks, and installs the theme hook into
-`~/.config/omarchy/hooks/theme-set.d/50-aether-cli-retints` so fastfetch, cava
-and lazygit follow **every** theme switch, not just Aether's:
+`~/.config/omarchy/hooks/theme-set.d/50-aether-cli-retints` so fastfetch, cava,
+lazygit, the bar and the screensaver follow **every** theme switch, not just
+Aether's:
 
 ```bash
 # Single pieces
 .../install-extras.sh gtk
 .../install-extras.sh screensaver
+.../install-extras.sh about
+.../install-extras.sh bar
 .../install-extras.sh fastfetch
 .../install-extras.sh cava
 .../install-extras.sh claude
@@ -286,6 +317,26 @@ The GTK4 file defines libadwaita's named colours; the GTK3 file defines the
 older `theme_*` tokens. Neither replaces Adwaita's widget layout. Backdrop blur
 in GTK apps still comes from Omarchy's Glassy windows mode. See
 [`extras/README.md`](extras/README.md) for details.
+
+The `bar` extra installs the floating bar: a patched clone of Omarchy's bar
+engine (made with `omarchy plugin clone omarchy.bar`) whose strip sits inset
+from the screen edge with fully rounded ends, instead of hugging it full-width.
+The clone is a full copy of the engine, so it renders from the Omarchy version
+present when the theme shipped and lags upstream bar changes until the theme
+re-ships it. The hook only flips `bar.id` (the clone while a theme that ships
+`extras/bar` is active, the stock engine otherwise) and `bar.background`
+(glassy while Aether is active; on leaving, the background you had before
+Aether ever took over, recorded at that first switch). Your widget layout is
+never touched. A pre-existing clone of your own is backed up whole and
+restored by `--remove`. Theme content changes are staged on
+`omarchy theme set`, so after adding or changing theme files, re-run
+`omarchy theme set aether` before the hook sees them.
+
+The same hook heals the terminals: their configs are includes of the staged
+theme's files, so palette and opacity already follow every switch, and a
+last-in-line reload re-resolves them for any terminal whose reload raced the
+theme swap (back-to-back switches can land a reload while the theme directory
+is being replaced — kitty keeps its previous look in that case).
 
 ## Customizing
 

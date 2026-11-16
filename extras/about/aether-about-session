@@ -1,0 +1,9 @@
+#!/bin/bash
+# Runs inside the About window (launched by aether-about-launcher): renders the
+# Aether About panel, then holds the window open until it is closed with the
+# window-close keybind — Ctrl+C closes too. Mirrors the persistent window of
+# omarchy-launch-about; without the hold, the terminal would collapse the
+# moment fastfetch finished printing.
+
+fastfetch -c "${AETHER_ABOUT_CONFIG:-$HOME/.config/omarchy/branding/aether-about.jsonc}"
+while read -r; do :; done
