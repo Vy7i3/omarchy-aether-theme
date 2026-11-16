@@ -1,0 +1,144 @@
+/* Aether — Obsidian theme (synced by omarchy-theme-set-obsidian)          */
+/* Cyber-ethereal frosted glass: obsidian-midnight surfaces with cyan and  */
+/* violet accents. Select the "Omarchy" theme once in a vault's           */
+/* Settings → Appearance → Themes; later switches retint automatically.   */
+
+.theme-dark,
+.theme-light {
+  /* Core surfaces — midnight with a whisper of cyan in the panels. */
+  --background-primary: #070b14;
+  --background-primary-alt: #04060c;
+  --background-secondary: #0a1220;
+  --background-secondary-alt: #0d1728;
+
+  --text-normal: #e6f1ff;
+  --text-selection: #12384a;
+
+  --background-modifier-border: #2b3f57;
+  --background-modifier-border-hover: #4a505b;
+  --background-modifier-border-focus: #00f0ff;
+
+  /* Headings walk the palette. */
+  --text-title-h1: #00f0ff;
+  --text-title-h2: #a855f7;
+  --text-title-h3: #4cc9f0;
+  --text-title-h4: #5cf2c5;
+  --text-title-h5: #ffd166;
+  --text-title-h6: #ff9e64;
+
+  /* Links and accents. */
+  --text-link: #4cc9f0;
+  --text-accent: #00f0ff;
+  --text-accent-hover: #7df9ff;
+  --interactive-accent: #00f0ff;
+  --interactive-accent-hover: #7df9ff;
+
+  --text-muted: color-mix(in srgb, #e6f1ff 70%, transparent);
+  --text-faint: color-mix(in srgb, #e6f1ff 55%, transparent);
+
+  /* Code. */
+  --code-normal: #00f0ff;
+  --code-background: #0d1523;
+
+  --text-error: #ff4d6d;
+  --text-error-hover: #ff7a93;
+  --text-success: #5cf2c5;
+
+  /* Tags: violet glyphs on midnight pills. */
+  --tag-color: #00f0ff;
+  --tag-background: #2b3f57;
+
+  /* Graph. */
+  --graph-line: #2b3f57;
+  --graph-node: #00f0ff;
+  --graph-node-focused: #4cc9f0;
+  --graph-node-tag: #00f0ff;
+  --graph-node-attachment: #5cf2c5;
+
+  /* Chrome. */
+  --titlebar-background: #04060c;
+  --titlebar-background-focused: #070b14;
+  --tab-outline-color: #2b3f57;
+  --tab-text-color-focused-active: #e6f1ff;
+  --active-line-bg: color-mix(in srgb, #12384a 45%, transparent);
+}
+
+/* Headers. */
+.cm-header-1,
+.markdown-rendered h1 {
+  color: var(--text-title-h1);
+}
+.cm-header-2,
+.markdown-rendered h2 {
+  color: var(--text-title-h2);
+}
+.cm-header-3,
+.markdown-rendered h3 {
+  color: var(--text-title-h3);
+}
+.cm-header-4,
+.markdown-rendered h4 {
+  color: var(--text-title-h4);
+}
+.cm-header-5,
+.markdown-rendered h5 {
+  color: var(--text-title-h5);
+}
+.cm-header-6,
+.markdown-rendered h6 {
+  color: var(--text-title-h6);
+}
+
+/* A cyan → violet rule, like the window borders. */
+.markdown-rendered hr,
+.cm-hr {
+  border: none;
+  height: 2px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, #00f0ff, #a855f7);
+  opacity: 0.65;
+}
+
+/* Blockquotes glow cyan at the edge. */
+.markdown-rendered blockquote,
+.cm-quote {
+  border-left: 2px solid #00f0ff;
+  background: color-mix(in srgb, #00f0ff 4%, transparent);
+  border-radius: 0 8px 8px 0;
+}
+
+/* Inline code keeps a frosted pill. */
+:not(.cm-editor) code,
+.cm-inline-code {
+  border-radius: 5px;
+  border: 1px solid color-mix(in srgb, #2b3f57 80%, transparent);
+}
+
+/* Tag pills tinted toward violet. */
+a.tag {
+  border: 1px solid color-mix(in srgb, #a855f7 55%, transparent);
+  border-radius: 20px;
+  color: var(--tag-color);
+}
+a.tag:hover {
+  border-color: #a855f7;
+}
+
+/* Selected files and active nav rows echo the selection token. */
+.nav-file-title.is-active,
+.nav-folder-title.is-active,
+.tree-item-self.is-active {
+  background: #12384a;
+  box-shadow: inset 2px 0 0 #00f0ff;
+}
+
+/* Checkboxes complete in mint. */
+input[type="checkbox"]:checked {
+  background-color: #5cf2c5;
+  border-color: #5cf2c5;
+}
+
+/* Empty-state art stays dim. */
+.empty-state-container .empty-state {
+  color: var(--text-faint);
+}

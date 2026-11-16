@@ -1,0 +1,31 @@
+# Aether — shared interactive chrome
+# Replaces the generated [controls] section. Focus and selection are cyan;
+# idle borders lean violet so the two accents stay legible together.
+
+[controls]
+normal-color        = "#e6f1ff"
+normal-fill-alpha   = 0.03
+normal-border       = "#a855f7"
+normal-border-width = 1
+normal-border-alpha = 0.35
+
+hover-cursor-color        = "#00f0ff"
+hover-cursor-fill-alpha   = 0.08
+hover-cursor-border       = "#00f0ff"
+hover-cursor-border-width = 1
+hover-cursor-border-alpha = 0.55
+
+focus-color        = "#00f0ff"
+focus-fill-alpha   = 0.10
+focus-border       = "#00f0ff"
+focus-border-width = 1
+focus-border-alpha = 0.80
+
+selected-color        = "#00f0ff"
+selected-fill-alpha   = 0.16
+selected-border       = "#00f0ff"
+selected-border-width = 1
+selected-border-alpha = 0.60
+
+pressed-fill-alpha   = 0.22
+selection-fill-alpha = 0.30
